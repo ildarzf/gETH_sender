@@ -26,12 +26,12 @@ web3 = Web3(Web3.HTTPProvider(RPC))
 
 ############################################  ИЗМЕНЯЕМЫЕ ПАРАМЕТРЫ  #######################################
 max_chains = 4 # от 1 до 4 сетей для отправки из списка  text_variants
-proc_gETH_min = 5     # от 3 процентов аккаунта слать в другую тестовую сеть
-proc_gETH_max = 10      # 5 %  максимальный % gETH для перевода в одну сеть от баланса
+proc_gETH_min = 4     # от 3 процентов аккаунта слать в другую тестовую сеть
+proc_gETH_max = 6      # 5 %  максимальный % gETH для перевода в одну сеть от баланса
 sleeptime_min = 40     # минимальная задержа  между транзакциями
-sleeptime_max = 50     # максимальная задержа  между транзакциями
+sleeptime_max = 60     # максимальная задержа  между транзакциями
 wal_sleep_min = 160    # минимальная задержка между кошелька
-wal_sleep_max = 190    # максимальная задержка между кошелька
+wal_sleep_max = 180    # максимальная задержка между кошелька
 text_variants = ["Arbitrum Testnet", "Optimism Testnet", "zkSync Era Testnet", "Base Testnet"]   # При желании лишнее удалить  "Arbitrum Testnet", "Optimism Testnet", "zkSync Era Testnet", "Base Testnet"
 
 ###########################################################################################################
@@ -52,13 +52,14 @@ for wallet in wallets:
 
 
     r = random.randint(1,max_chains)  #кол-во случайных активностей
+    acc_balance = web3.eth.get_balance(account_add)
 
-    for i in range(r):
+    if acc_balance > 0:
+     for i in range(r):
       str_ch = random.choice(text_variants)
       text_variants.remove(str_ch)
       k = i+1
       try:
-
         if str_ch == 'Arbitrum Testnet':
           print('№ бриджа ',k,' ++++++++++ Запуск ',str_ch,'++++++++++')
           toArbsingl.bridge(wallet, proc_gETH_min, proc_gETH_max)
@@ -72,11 +73,16 @@ for wallet in wallets:
           print('№ бриджа ',k,' ++++++++++ Запуск ',str_ch,'++++++++++')
           tozkSyncEra.bridge(wallet, proc_gETH_min, proc_gETH_max)
       except:
-          print('Ошибка в кошельке. Может нет gETH')
+          print('Ошибка в работе с кошельком')
       rnd_way.append(str_ch)
       sleeping(sleeptime_min, sleeptime_max)
-    print(rnd_way)
-    sleeping(wal_sleep_min,wal_sleep_max)
+    else:
+      print('На кошельке нет gETH')
+    #print(rnd_way)
+    if acc_balance == 0:
+      pass
+    else:
+      sleeping(wal_sleep_min,wal_sleep_max)
   except:
-    account_add = web3.eth.account.from_key(wallet).address
-    print('Ошибка! Может нет gETH в кошельке?', account_add)
+   account_add = web3.eth.account.from_key(wallet).address
+   print('Ошибка!', account_add)
